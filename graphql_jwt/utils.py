@@ -60,12 +60,19 @@ def jwt_decode(token, context=None):
     )
 
 
+def get_cookie_name(request, refresh_cookie=False):
+    prefix = request.get_host().split(".")[0]
+    if refresh_cookie:
+        return prefix + jwt_settings.JWT_REFRESH_TOKEN_COOKIE_NAME
+    return prefix + jwt_settings.JWT_COOKIE_NAME
+
+
 def get_http_authorization(request):
     auth = request.META.get(jwt_settings.JWT_AUTH_HEADER_NAME, '').split()
     prefix = jwt_settings.JWT_AUTH_HEADER_PREFIX
 
     if len(auth) != 2 or auth[0].lower() != prefix.lower():
-        return request.COOKIES.get(jwt_settings.JWT_COOKIE_NAME)
+        return request.COOKIES.get(get_cookie_name(request))
     return auth[1]
 
 

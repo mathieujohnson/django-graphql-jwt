@@ -12,7 +12,7 @@ from graphql.execution.execute import GraphQLResolveInfo
 from . import exceptions, signals
 from .refresh_token.shortcuts import create_refresh_token, refresh_token_lazy
 from .settings import jwt_settings
-from .utils import delete_cookie, set_cookie
+from .utils import delete_cookie, set_cookie, get_cookie_name
 
 __all__ = [
     'user_passes_test',
@@ -159,7 +159,7 @@ def jwt_cookie(view_func):
 
             set_cookie(
                 response,
-                jwt_settings.JWT_COOKIE_NAME,
+                get_cookie_name(request),
                 request.jwt_token,
                 expires=expires,
             )
@@ -170,16 +170,16 @@ def jwt_cookie(view_func):
 
                 set_cookie(
                     response,
-                    jwt_settings.JWT_REFRESH_TOKEN_COOKIE_NAME,
+                    get_cookie_name(request, True),
                     refresh_token.token,
                     expires=expires,
                 )
 
         if hasattr(request, 'delete_jwt_cookie'):
-            delete_cookie(response, jwt_settings.JWT_COOKIE_NAME)
+            delete_cookie(response, get_cookie_name(request))
 
         if hasattr(request, 'delete_refresh_token_cookie'):
-            delete_cookie(response, jwt_settings.JWT_REFRESH_TOKEN_COOKIE_NAME)
+            delete_cookie(response, get_cookie_name(request, True))
 
         return response
     return wrapped_view
@@ -189,7 +189,7 @@ def ensure_token(f):
     @wraps(f)
     def wrapper(cls, root, info, token=None, *args, **kwargs):
         if token is None:
-            token = info.context.COOKIES.get(jwt_settings.JWT_COOKIE_NAME)
+            token = info.context.COOKIES.get(get_cookie_name(info.context))
 
             if token is None:
                 raise exceptions.JSONWebTokenError(_('Token is required'))

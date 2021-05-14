@@ -9,6 +9,7 @@ from .. import exceptions
 from ..decorators import csrf_rotation, refresh_expiration, setup_jwt_cookie
 from ..settings import jwt_settings
 from . import signals
+from ..utils import get_cookie_name
 from .decorators import ensure_refresh_token
 from .shortcuts import (
     create_refresh_token, get_refresh_token, refresh_token_lazy,
@@ -85,7 +86,7 @@ class DeleteRefreshTokenCookieMixin:
     def delete_cookie(cls, root, info, **kwargs):
         context = info.context
         context.delete_refresh_token_cookie = (
-            jwt_settings.JWT_REFRESH_TOKEN_COOKIE_NAME in context.COOKIES and
+            get_cookie_name(context, True) in context.COOKIES and
             getattr(context, 'jwt_cookie', False)
         )
         return cls(deleted=context.delete_refresh_token_cookie)

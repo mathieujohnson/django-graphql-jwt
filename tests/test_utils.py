@@ -84,7 +84,7 @@ class GetHTTPAuthorizationHeaderTests(TestCase):
         }
 
         request = self.request_factory.get('/', **headers)
-        request.COOKIES[jwt_settings.JWT_COOKIE_NAME] = self.token
+        request.COOKIES[utils.get_cookie_name(request)] = self.token
         authorization_cookie = utils.get_http_authorization(request)
 
         self.assertEqual(authorization_cookie, self.token)

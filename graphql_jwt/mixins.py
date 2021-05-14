@@ -8,7 +8,7 @@ from . import exceptions, signals
 from .decorators import csrf_rotation, ensure_token, setup_jwt_cookie
 from .refresh_token.mixins import RefreshTokenMixin
 from .settings import jwt_settings
-from .utils import get_payload, get_user_by_payload
+from .utils import get_payload, get_user_by_payload, get_cookie_name
 
 
 class JSONWebTokenMixin:
@@ -108,7 +108,7 @@ class DeleteJSONWebTokenCookieMixin:
     def delete_cookie(cls, root, info, **kwargs):
         context = info.context
         context.delete_jwt_cookie = (
-            jwt_settings.JWT_COOKIE_NAME in context.COOKIES and
+            get_cookie_name(context) in context.COOKIES and
             getattr(context, 'jwt_cookie', False)
         )
         return cls(deleted=context.delete_jwt_cookie)
